@@ -3,13 +3,13 @@ create database prod;
 use prod;
 
 create table parking(
-PARKING_NUMBER int PRIMARY KEY,
+PARKING_NUMBER int PRIMARY KEY NOT NULL,
 AVAILABLE bool NOT NULL,
 TYPE varchar(10) NOT NULL
 );
 
 create table ticket(
- ID int PRIMARY KEY AUTO_INCREMENT,
+ ID int PRIMARY KEY AUTO_INCREMENT NOT NULL,
  PARKING_NUMBER int NOT NULL,
  VEHICLE_REG_NUMBER varchar(10) NOT NULL,
  PRICE double,
