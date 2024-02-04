@@ -18,6 +18,7 @@ import java.util.Date;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+
 public class ParkingServiceTest {
 
 	@InjectMocks
@@ -32,7 +33,10 @@ public class ParkingServiceTest {
 	@Mock
 	private static TicketDAO ticketDAO;
 
+	@Mock
 	private static Ticket ticket;
+
+	@Mock
 	private static ParkingSpot parkingSpot;
 
 	@BeforeEach
@@ -52,14 +56,11 @@ public class ParkingServiceTest {
 
 	@Test
 	public void testProcessIncomingVehicle() throws Exception {
-		// given
+		// test the method call where everything goes as expected
 		when(inputReaderUtil.readSelection()).thenReturn(1);
 		when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
-		// when
 		parkingService.processIncomingVehicle();
-		// then
 		verify(ticketDAO, Mockito.times(1)).saveTicket(any(Ticket.class));
-
 	}
 
 	@Test
@@ -68,27 +69,51 @@ public class ParkingServiceTest {
 		when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
 		when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
 		parkingService.processExitingVehicle();
-		ticketDAO.getNbTicket();
+		ticketDAO.getNbTicket("ABCDEF");
 		verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
-		verify(ticketDAO, Mockito.times(2)).getNbTicket();
+		verify(ticketDAO, Mockito.times(2)).getNbTicket("ABCDEF");
 	}
-	/*
-	 * //test Sortie du véhicule si mise à jour impossible
-	 * 
-	 * @Test public void processExitingVehicleTestUnableUpdate() {
-	 * parkingService.processExitingVehicle(); verify(ticketDAO,
-	 * Mockito.times(1)).updateTicket(any(Ticket.class)); 
-	 * }
-	 * 
-	 * @Test public void testGetNextParkingNumberIfAvailable() {
-	 * when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
-	 * parkingService.getNextParkingNumberIfAvailable();
-	 * verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
-	 }
-	 * @Test public void testGetNextParkingNumberIfAvailableParkingNumberNotFound(){ 
-	 * parkingService.getNextParkingNumberIfAvailable(); }
-	 * 
-	 * @Test public void testGetNextParkingNumberIfAvailableParkingNumberWrongArgum(){
-	 * parkingService.getNextParkingNumberIfAvailable(); }
-	 */
+	
+	@Test
+	public void processExitingVehicleTestUnableUpdate() throws Exception {
+		//test the method in case updateTicket() returns false
+		when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+		when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
+		when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);
+		parkingService.processExitingVehicle();
+		verify(ticketDAO, Mockito.times(1)).updateTicket(ticket);
+	}
+	
+	@Test
+	public void testGetNextParkingNumberIfAvailable() {
+		//test of the method with the result of obtaining a spot whose ID is 1 and which is available
+		when(inputReaderUtil.readSelection()).thenReturn(1);
+		when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
+		parkingService.processIncomingVehicle();
+		verify(parkingSpotDAO, times(1)).getNextAvailableSlot(any(ParkingType.class));
+	}
+
+	@Test
+	public void processExitingVehicleException() throws Exception {
+		when(inputReaderUtil.readVehicleRegistrationNumber()).thenThrow(Exception.class);
+		parkingService.processExitingVehicle();
+	}
+
+	@Test
+	public void testGetNextParkingNumberIfAvailableParkingNumberNotFound() throws Exception {
+		int unavailableSpot = -1;
+		when(inputReaderUtil.readSelection()).thenReturn(1);
+		when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(unavailableSpot);
+		parkingService.processIncomingVehicle();
+		verify(inputReaderUtil, Mockito.times(0)).readVehicleRegistrationNumber();
+	}
+	
+	@Test
+	public void testGetNextParkingNumberIfAvailableParkingNumberWrongArgum() {
+		when(inputReaderUtil.readSelection()).thenReturn(1);
+		when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(3);
+		parkingService.processIncomingVehicle();
+		verify(parkingSpotDAO, times(1)).getNextAvailableSlot(any(ParkingType.class));
+		verify(inputReaderUtil, times(1)).readSelection();
+	}
 }

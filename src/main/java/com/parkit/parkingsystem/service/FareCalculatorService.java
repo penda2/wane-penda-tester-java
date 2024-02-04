@@ -1,6 +1,7 @@
 package com.parkit.parkingsystem.service;
 
 import com.parkit.parkingsystem.constants.Fare;
+import static java.lang.Math.round;
 import com.parkit.parkingsystem.model.Ticket;
 
 public class FareCalculatorService {
@@ -34,9 +35,8 @@ public class FareCalculatorService {
 			default:
 				throw new IllegalArgumentException("Unkown Parking Type");
 			}
-			if (discount) {
-				ticket.setPrice((ticket.getPrice() * 0.95));
-			}
+			ticket.setPrice((double) round(ticket.getPrice() * 1000) / 1000);
+
 		}
 
 	}
