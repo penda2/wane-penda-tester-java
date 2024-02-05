@@ -29,7 +29,7 @@ public class TicketDAOTest {
 		dataBasePrepareService.clearDataBaseEntries();
 		parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
 	}
-
+// TicketDAO class methods tested for better Jacoco test coverage 
 	@Test
 	public void saveTicketTest() {
 		Ticket ticket = new Ticket();

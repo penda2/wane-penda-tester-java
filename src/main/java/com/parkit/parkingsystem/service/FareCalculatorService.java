@@ -13,13 +13,15 @@ public class FareCalculatorService {
 		if ((ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime()))) {
 			throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());
 		}
-
+		// correction of the bug by changing the time to milliseconds
 		long inHour = ticket.getInTime().getTime();
 		long outHour = ticket.getOutTime().getTime();
-
+		
+		//configuring duration at the right time scale
 		long millisDuration = outHour - inHour;
 		float duration = (millisDuration / 3600000) + (millisDuration % 3600000 / 60000 / 60.f);
 
+		// setting price to 0 if duration is less than 30 minutes
 		if (duration <= 0.50) {
 			ticket.setPrice(0);
 		} else {
@@ -35,9 +37,9 @@ public class FareCalculatorService {
 			default:
 				throw new IllegalArgumentException("Unkown Parking Type");
 			}
-			ticket.setPrice((double) round(ticket.getPrice() * 1000) / 1000);
-
+			if (discount) {
+				ticket.setPrice((ticket.getPrice() * 0.95));
+			}
 		}
-
 	}
 }

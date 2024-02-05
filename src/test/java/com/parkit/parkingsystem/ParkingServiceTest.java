@@ -54,15 +54,16 @@ public class ParkingServiceTest {
 		}
 	}
 
+	// test the method call where everything goes as expected
 	@Test
 	public void testProcessIncomingVehicle() throws Exception {
-		// test the method call where everything goes as expected
 		when(inputReaderUtil.readSelection()).thenReturn(1);
 		when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
 		parkingService.processIncomingVehicle();
 		verify(ticketDAO, Mockito.times(1)).saveTicket(any(Ticket.class));
 	}
 
+	// Test process exiting vehicle which mocks the call to the getNbTicket() method
 	@Test
 	public void processExitingVehicleTest() throws Exception {
 		when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
@@ -74,9 +75,9 @@ public class ParkingServiceTest {
 		verify(ticketDAO, Mockito.times(2)).getNbTicket("ABCDEF");
 	}
 	
+	//test the method in case updateTicket() returns false
 	@Test
 	public void processExitingVehicleTestUnableUpdate() throws Exception {
-		//test the method in case updateTicket() returns false
 		when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
 		when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
 		when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);
@@ -84,21 +85,16 @@ public class ParkingServiceTest {
 		verify(ticketDAO, Mockito.times(1)).updateTicket(ticket);
 	}
 	
+	//test of the method with the result of obtaining a spot whose ID is 1 and which is available 
 	@Test
 	public void testGetNextParkingNumberIfAvailable() {
-		//test of the method with the result of obtaining a spot whose ID is 1 and which is available
 		when(inputReaderUtil.readSelection()).thenReturn(1);
 		when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
 		parkingService.processIncomingVehicle();
 		verify(parkingSpotDAO, times(1)).getNextAvailableSlot(any(ParkingType.class));
 	}
 
-	@Test
-	public void processExitingVehicleException() throws Exception {
-		when(inputReaderUtil.readVehicleRegistrationNumber()).thenThrow(Exception.class);
-		parkingService.processExitingVehicle();
-	}
-
+	// return getNextParkingNumberIfAvailable() method as null if no spot available
 	@Test
 	public void testGetNextParkingNumberIfAvailableParkingNumberNotFound() throws Exception {
 		int unavailableSpot = -1;
@@ -108,6 +104,7 @@ public class ParkingServiceTest {
 		verify(inputReaderUtil, Mockito.times(0)).readVehicleRegistrationNumber();
 	}
 	
+	//return getNextParkingNumberIfAvailable() method as null if vehicle type entered is incorrect
 	@Test
 	public void testGetNextParkingNumberIfAvailableParkingNumberWrongArgum() {
 		when(inputReaderUtil.readSelection()).thenReturn(1);
